@@ -32,10 +32,10 @@ jobs:
       - name: Récupérer le code source
         uses: actions/checkout@v4
 
-      - name: Configurer Node.js 22
+      - name: Configurer Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "24"
 
       - name: Configurer Java 21 (Temurin)
         uses: actions/setup-java@v4
@@ -53,7 +53,7 @@ jobs:
           "$SDK_BIN" "platform-tools" "platforms;android-36" "build-tools;36.0.0"
 
       - name: Installer les dépendances Node.js
-        run: npm install --no-audit --no-fund
+        run: npm install --no-audit --no-fund --legacy-peer-deps
 
       - name: Compiler le frontend Web & PWA (dist/)
         env:
