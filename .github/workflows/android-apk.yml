@@ -63,12 +63,14 @@ jobs:
           chmod +x android/gradlew
 
       - name: Décoder le Keystore de signature (si fourni dans les secrets GitHub)
-        if: ${{ github.event.inputs.build_type == 'release' && secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        if: ${{ github.event.inputs.build_type == 'release' }}
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |
-          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "${{ runner.temp }}/sonelgaz-release.jks"
-          echo "ANDROID_KEYSTORE_PATH=${{ runner.temp }}/sonelgaz-release.jks" >> "$GITHUB_ENV"
+          if [ -n "$ANDROID_KEYSTORE_BASE64" ]; then
+            echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "${{ runner.temp }}/sonelgaz-release.jks"
+            echo "ANDROID_KEYSTORE_PATH=${{ runner.temp }}/sonelgaz-release.jks" >> "$GITHUB_ENV"
+          fi
 
       - name: Compiler l'APK Android Debug (installable directement)
         if: ${{ github.event.inputs.build_type != 'release' }}
