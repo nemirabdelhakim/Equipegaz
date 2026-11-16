@@ -1,0 +1,145 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Filet de sécurité global par défaut
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isAdmin() {
+      return isVerifiedUser() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        request.auth.token.email == 'nemirabdelhakim@gmail.com'
+      );
+    }
+
+    function isValidAdmin(data) {
+      return data.keys().hasAll(['uid', 'email', 'createdAt'])
+        && data.keys().hasOnly(['uid', 'email', 'createdAt'])
+        && isValidId(data.uid)
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 160
+        && data.createdAt is timestamp;
+    }
+
+    function isValidAgentPublic(data) {
+      return data.keys().hasAll(['agent_id', 'matricule', 'nom', 'prenom', 'fonction', 'role', 'statut', 'date_creation'])
+        && data.keys().hasOnly(['agent_id', 'matricule', 'nom', 'prenom', 'fonction', 'role', 'statut', 'firebase_uid', 'date_creation', 'derniere_connexion'])
+        && isValidId(data.agent_id)
+        && data.matricule is string && data.matricule.size() >= 2 && data.matricule.size() <= 32
+        && data.nom is string && data.nom.size() >= 1 && data.nom.size() <= 80
+        && data.prenom is string && data.prenom.size() >= 1 && data.prenom.size() <= 80
+        && data.fonction is string && data.fonction.size() >= 2 && data.fonction.size() <= 120
+        && data.role in ['CHEF', 'AGENT']
+        && data.statut in ['ACTIF', 'INACTIF', 'ABSENT', 'CONGÉ', 'SUSPENDU']
+        && data.date_creation is string && data.date_creation.size() >= 10 && data.date_creation.size() <= 40
+        && (!('firebase_uid' in data) || (data.firebase_uid is string && data.firebase_uid.size() <= 128))
+        && (!('derniere_connexion' in data) || (data.derniere_connexion is string && data.derniere_connexion.size() <= 40));
+    }
+
+    function isValidAgentPrivate(data) {
+      return data.keys().hasAll(['agent_id', 'telephone', 'login_email'])
+        && data.keys().hasOnly(['agent_id', 'owner_uid', 'telephone', 'login_email'])
+        && isValidId(data.agent_id)
+        && data.telephone is string && data.telephone.size() >= 6 && data.telephone.size() <= 30
+        && data.login_email is string && data.login_email.size() >= 3 && data.login_email.size() <= 160
+        && (!('owner_uid' in data) || (data.owner_uid is string && data.owner_uid.size() <= 128));
+    }
+
+    function isValidParam(data) {
+      return data.keys().hasAll(['param_id', 'categorie', 'valeur', 'libelle', 'actif'])
+        && data.keys().hasOnly(['param_id', 'categorie', 'valeur', 'libelle', 'actif'])
+        && isValidId(data.param_id)
+        && data.categorie in ['COMMUNE', 'DP', 'COMMUNE_DP', 'CATEGORIE_TRAVAUX', 'EQUIPE']
+        && data.valeur is string && data.valeur.size() >= 1 && data.valeur.size() <= 64
+        && data.libelle is string && data.libelle.size() >= 1 && data.libelle.size() <= 160
+        && data.actif is bool;
+    }
+
+    function isValidHistory(data) {
+      return data.keys().hasAll(['history_id', 'user_id', 'action', 'date_serveur'])
+        && data.keys().hasOnly(['history_id', 'user_id', 'action', 'ancien_etat', 'nouvel_etat', 'commentaire', 'date_serveur'])
+        && isValidId(data.history_id)
+        && isValidId(data.user_id)
+        && data.action is string && data.action.size() >= 2 && data.action.size() <= 80
+        && data.date_serveur is string && data.date_serveur.size() >= 10 && data.date_serveur.size() <= 40
+        && (!('ancien_etat' in data) || (data.ancien_etat is string && data.ancien_etat.size() <= 80))
+        && (!('nouvel_etat' in data) || (data.nouvel_etat is string && data.nouvel_etat.size() <= 80))
+        && (!('commentaire' in data) || (data.commentaire is string && data.commentaire.size() <= 500));
+    }
+
+    match /admins/{userId} {
+      allow get: if isValidId(userId) && isVerifiedUser() && (request.auth.uid == userId || isAdmin());
+      allow list: if isAdmin();
+      allow create: if isValidId(userId) && isAdmin() && isValidAdmin(incoming()) && incoming().uid == userId && incoming().createdAt == request.time;
+      allow update, delete: if false;
+    }
+
+    match /agents/{agentId} {
+      allow get: if isValidId(agentId) && isVerifiedUser() && (isAdmin() || existing().firebase_uid == request.auth.uid || existing().statut == 'ACTIF');
+      allow list: if isVerifiedUser() && (isAdmin() || resource.data.statut == 'ACTIF');
+      allow create: if isValidId(agentId) && isAdmin() && isValidAgentPublic(incoming()) && incoming().agent_id == agentId;
+      allow update: if isValidId(agentId) && isAdmin() && isValidAgentPublic(incoming())
+        && incoming().agent_id == existing().agent_id
+        && incoming().date_creation == existing().date_creation
+        && incoming().diff(existing()).affectedKeys().hasOnly(['matricule', 'nom', 'prenom', 'fonction', 'role', 'statut', 'firebase_uid', 'derniere_connexion']);
+      allow delete: if false;
+
+      match /private/{docId} {
+        allow get: if isValidId(agentId) && isValidId(docId) && isVerifiedUser() && (
+          isAdmin() ||
+          get(/databases/$(database)/documents/agents/$(agentId)).data.firebase_uid == request.auth.uid
+        );
+        allow list: if false;
+        allow create: if isValidId(agentId) && isValidId(docId) && docId == 'info' && isAdmin() && isValidAgentPrivate(incoming()) && incoming().agent_id == agentId;
+        allow update: if isValidId(agentId) && isValidId(docId) && docId == 'info' && isAdmin() && isValidAgentPrivate(incoming())
+          && incoming().agent_id == existing().agent_id
+          && incoming().diff(existing()).affectedKeys().hasOnly(['owner_uid', 'telephone', 'login_email']);
+        allow delete: if false;
+      }
+    }
+
+    match /parameters/{paramId} {
+      allow get: if isValidId(paramId) && isVerifiedUser();
+      allow list: if isVerifiedUser() && resource.data.actif == true;
+      allow create: if isValidId(paramId) && isAdmin() && isValidParam(incoming()) && incoming().param_id == paramId;
+      allow update: if isValidId(paramId) && isAdmin() && isValidParam(incoming())
+        && incoming().param_id == existing().param_id
+        && incoming().diff(existing()).affectedKeys().hasOnly(['categorie', 'valeur', 'libelle', 'actif']);
+      allow delete: if false;
+    }
+
+    match /history/{historyId} {
+      allow get: if isValidId(historyId) && isVerifiedUser() && (isAdmin() || existing().user_id == request.auth.uid);
+      allow list: if isVerifiedUser() && (isAdmin() || resource.data.user_id == request.auth.uid);
+      allow create: if isValidId(historyId) && isVerifiedUser() && isValidHistory(incoming())
+        && incoming().history_id == historyId
+        && (isAdmin() || incoming().user_id == request.auth.uid);
+      allow update, delete: if false;
+    }
+
+    match /test/{docId} {
+      allow get: if isValidId(docId) && docId == 'connection';
+      allow list, write: if false;
+    }
+  }
+}

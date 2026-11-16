@@ -1,0 +1,6 @@
+{
+  "name": "GESTION ÉQUIPE GAZ – SIDI ALI",
+  "description": "Système opérationnel de gestion des interventions de terrain – Sonelgaz Distribution, District Gaz Sidi Ali (Mostaganem).",
+  "requestFramePermissions": ["geolocation", "camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,1077 @@
+PROMPT MASTER – DÉVELOPPEMENT DE L'APPLICATION GESTION ÉQUIPE GAZ – DISTRICT SIDI ALI
+
+RÔLE ET MISSION DE L'IA DE DÉVELOPPEMENT
+
+Agis comme une équipe complète d'ingénieurs logiciels seniors, comprenant un architecte logiciel, un développeur Android, un développeur Web, un ingénieur Backend, un expert Google Sheets API, un expert Firebase, un spécialiste des applications hors connexion et un expert UX/UI.
+
+Ta mission est de concevoir, développer, tester et livrer une application professionnelle réellement fonctionnelle destinée à la gestion des travaux de terrain d'une équipe de distribution du gaz de Sonelgaz, District Gaz Sidi Ali, Direction de Distribution de Mostaganem, Algérie.
+
+IMPORTANT : Il ne s'agit pas de créer une simple maquette ou une liste de tâches. Il faut développer un véritable système opérationnel, sécurisé, synchronisé, avec stockage centralisé, gestion des utilisateurs, suivi des interventions, comptes rendus et historique complet.
+
+==================================================
+1. PRÉSENTATION GÉNÉRALE DU PROJET
+==================================================
+
+Nom officiel : GESTION ÉQUIPE GAZ – SIDI ALI.
+
+Organisation : Sonelgaz Distribution.
+Direction : Direction de Distribution de Mostaganem.
+District : District Gaz Sidi Ali.
+Responsable principal : Chef d'équipe gaz distribution.
+
+OBJECTIF PRINCIPAL :
+
+Permettre au chef d'équipe de préparer, organiser, planifier, transmettre et contrôler toutes les tâches de terrain.
+
+Permettre aux agents de recevoir les tâches, de consulter leur contenu, de connaître les priorités, de déclarer l'avancement, de signaler les difficultés et de rédiger un compte rendu pour chaque intervention.
+
+L'ensemble des informations doit être centralisé et partagé entre le chef et les agents.
+
+L'application doit fonctionner sur :
+- Téléphones Android sous forme d'APK installable.
+- Ordinateurs Windows à travers une interface Web.
+- Navigateurs modernes compatibles.
+
+Les deux interfaces utilisent le même serveur, la même base de données et les mêmes règles de gestion.
+
+LANGUE : Français.
+FORMAT DES DATES : JJ/MM/AAAA.
+HEURE : Format 24 heures.
+FUSEAU HORAIRE : Africa/Algiers.
+DEVISE : Dinar algérien si des montants sont ajoutés ultérieurement.
+
+==================================================
+2. ARCHITECTURE TECHNIQUE OBLIGATOIRE
+==================================================
+
+Construire une architecture moderne, modulaire, évolutive et sécurisée.
+
+FRONTEND :
+- React.
+- TypeScript.
+- Ionic pour les interfaces mobiles.
+- Capacitor pour la génération Android.
+- Interface Web responsive.
+- Design professionnel adapté aux conditions de terrain.
+
+BACKEND :
+- Node.js.
+- TypeScript.
+- API REST sécurisée.
+- Validation des données côté serveur.
+- Gestion centralisée des utilisateurs et des autorisations.
+- Gestion des synchronisations.
+- Gestion des conflits.
+- Journalisation des opérations.
+
+BASE CENTRALE :
+- Google Sheets API comme stockage métier initial.
+- Google Apps Script si nécessaire pour certaines automatisations.
+- Google Drive pour les photographies et les documents.
+- Firebase Authentication pour l'authentification.
+- Firebase Cloud Messaging pour les notifications push.
+
+STOCKAGE LOCAL :
+- SQLite sur Android.
+- IndexedDB sur Web.
+- File d'attente locale pour les opérations non synchronisées.
+- Cache des tâches, des agents et des paramètres.
+
+RÈGLE ABSOLUE :
+Les applications Android et Web ne doivent jamais modifier directement les feuilles Google Sheets. Toutes les modifications passent par le Backend sécurisé.
+
+Prévoir une couche d'accès aux données indépendante de Google Sheets afin de permettre une migration ultérieure vers PostgreSQL ou Firestore sans refaire les applications.
+
+==================================================
+3. GESTION DES UTILISATEURS
+==================================================
+
+Créer deux rôles principaux.
+
+A. RÔLE CHEF D'ÉQUIPE
+
+Le chef d'équipe dispose des droits suivants :
+- Créer des tâches.
+- Modifier les tâches.
+- Supprimer ou annuler une tâche selon les règles de traçabilité.
+- Affecter une tâche à un ou plusieurs agents.
+- Réaffecter une tâche.
+- Créer et gérer les comptes agents.
+- Activer et désactiver des agents.
+- Consulter toutes les tâches.
+- Consulter tous les comptes rendus.
+- Contrôler l'avancement.
+- Modifier les priorités.
+- Modifier les échéances.
+- Valider ou refuser un compte rendu.
+- Demander une correction.
+- Réouvrir une tâche.
+- Ajouter des observations.
+- Consulter l'historique.
+- Consulter les statistiques.
+- Exporter les données en Excel et PDF.
+- Administrer les paramètres.
+
+B. RÔLE AGENT
+
+Chaque agent dispose d'un compte personnel.
+
+L'agent peut :
+- Se connecter.
+- Consulter toutes les tâches publiées.
+- Voir toutes les tâches des collègues en lecture seule.
+- Identifier les tâches qui lui sont affectées.
+- Accepter une tâche.
+- Déclarer le début d'une intervention.
+- Mettre une tâche en attente avec motif.
+- Signaler une tâche bloquée.
+- Déclarer une intervention terminée.
+- Rédiger un compte rendu.
+- Ajouter des photographies.
+- Ajouter des observations.
+- Consulter son historique.
+- Consulter les commentaires du chef.
+- Consulter ses propres statistiques.
+
+Un agent ne doit jamais pouvoir modifier une tâche à laquelle il n'est pas affecté.
+
+Un agent ne doit jamais pouvoir modifier le compte rendu d'un autre agent.
+
+Les permissions doivent être vérifiées par le serveur et non uniquement par l'interface.
+
+==================================================
+4. GESTION DYNAMIQUE DES AGENTS
+==================================================
+
+Le nombre d'agents doit être illimité dans les limites techniques de la plateforme.
+
+Créer un module ADMINISTRATION DES AGENTS.
+
+Chaque agent possède :
+- Identifiant unique agent_id.
+- Matricule professionnel.
+- Nom.
+- Prénom.
+- Téléphone.
+- Fonction.
+- Photo facultative.
+- Identifiant de connexion.
+- Rôle.
+- Statut.
+- Date de création.
+- Dernière connexion.
+
+Statuts :
+- ACTIF.
+- INACTIF.
+- ABSENT.
+- CONGÉ.
+- SUSPENDU.
+
+Le chef doit pouvoir :
+- Ajouter un agent.
+- Modifier sa fiche.
+- Désactiver son accès.
+- Réactiver son accès.
+- Réinitialiser son accès selon une procédure sécurisée.
+- Consulter ses travaux.
+- Consulter son historique.
+
+La désactivation d'un agent ne doit jamais supprimer son historique ni ses anciennes interventions.
+
+==================================================
+5. GESTION DES COMMUNES ET DP
+==================================================
+
+Créer une gestion administrable des communes et distributions publiques.
+
+Précharger les communes suivantes du District Gaz Sidi Ali :
+- Sidi Ali.
+- Hadjadj.
+- Ben Abdelmalek Ramdane.
+- Sidi Lakhdar.
+- Ouled Maallah.
+- Ouled Bouziane.
+- Tazgait.
+- Achaacha.
+- Nekmaria.
+- Khadra.
+
+Prévoir les 10 DP du district, avec leurs noms et leurs identifiants configurables.
+
+Ne pas figer les relations entre communes et DP dans le code.
+
+Le chef doit pouvoir modifier les paramètres géographiques.
+
+==================================================
+6. GESTION DES CATÉGORIES DE TRAVAUX
+==================================================
+
+Créer un catalogue administrable des interventions de terrain.
+
+Catégories initiales :
+
+1. FUG : Recherche et réparation de fuite gaz.
+2. ING : Intervention sur incident gaz.
+3. VAN : Entretien de vanne.
+4. CM : Entretien de compteur de manœuvre.
+5. VCH : Visite de chantier.
+6. ETU : Étude technique.
+7. ST : Sortie technique.
+8. DEET : Assistance DEET.
+9. COM : Assistance commerciale.
+10. ENT : Assistance entreprise.
+11. CPT : Intervention compteur.
+12. OUV : Contrôle d'ouvrage.
+13. RSF : Travaux RSF.
+14. PUR : Purge de réseau.
+15. CPM : Contrôle après mise en service.
+16. AUT : Autres travaux.
+
+Le chef peut ajouter, modifier ou désactiver une catégorie.
+
+==================================================
+7. CRÉATION DES TÂCHES
+==================================================
+
+Créer un module central appelé GESTION DES TÂCHES.
+
+Le chef doit pouvoir créer une nouvelle tâche à travers un formulaire clair.
+
+Informations obligatoires ou facultatives :
+
+- Identifiant unique.
+- Numéro de tâche automatique.
+- Titre.
+- Catégorie.
+- Description.
+- Instructions techniques.
+- Commune.
+- DP.
+- Adresse.
+- Repère géographique.
+- Coordonnées GPS facultatives.
+- Date de création.
+- Date prévue de début.
+- Date limite.
+- Heure prévue.
+- Niveau de priorité.
+- Agent ou agents affectés.
+- Équipe.
+- Matériel nécessaire.
+- Observations.
+- Pièces jointes.
+- Photos.
+- Auteur de la tâche.
+
+Générer un numéro lisible et unique, par exemple :
+GAZ-SA-2026-000001.
+
+Prévoir une recherche instantanée des tâches par :
+- Numéro.
+- Catégorie.
+- Commune.
+- DP.
+- Agent.
+- Date.
+- Priorité.
+- État.
+
+==================================================
+8. PRIORITÉS DES TÂCHES
+==================================================
+
+Créer quatre niveaux :
+
+URGENTE :
+Intervention immédiate, notamment incident ou situation présentant un danger.
+
+HAUTE :
+Intervention prioritaire.
+
+NORMALE :
+Travail programmé.
+
+BASSE :
+Travail non urgent.
+
+Utiliser une couleur et un indicateur distincts pour chaque priorité.
+
+Le chef peut modifier la priorité à tout moment.
+
+Chaque modification doit être enregistrée dans l'historique et notifiée aux agents affectés.
+
+==================================================
+9. ÉTATS ET SUIVI DES TÂCHES
+==================================================
+
+Prévoir les états suivants :
+
+- NOUVELLE.
+- TRANSMISE.
+- ACCEPTÉE.
+- EN COURS.
+- EN ATTENTE.
+- BLOQUÉE.
+- TERMINÉE.
+- À VALIDER.
+- VALIDÉE.
+- REFUSÉE.
+- ANNULÉE.
+
+Chaque changement d'état doit enregistrer :
+- Ancien état.
+- Nouvel état.
+- Utilisateur responsable.
+- Date.
+- Heure.
+- Commentaire éventuel.
+
+Le passage à BLOQUÉE ou EN ATTENTE nécessite un motif.
+
+Le passage à TERMINÉE nécessite un compte rendu soumis.
+
+Une tâche TERMINÉE n'est pas automatiquement considérée comme VALIDÉE.
+
+Seul le chef peut valider définitivement une intervention.
+
+==================================================
+10. AFFECTATION DES AGENTS
+==================================================
+
+Permettre :
+- Affectation à un seul agent.
+- Affectation à plusieurs agents.
+- Affectation à toute une équipe.
+- Réaffectation.
+- Ajout d'un agent supplémentaire.
+- Retrait d'un agent selon les droits du chef.
+
+Créer une relation indépendante entre les tâches et les agents.
+
+Pour une tâche collective, chaque agent possède son propre état d'exécution.
+
+Le chef doit pouvoir voir :
+- Qui a accepté.
+- Qui n'a pas encore accepté.
+- Qui a commencé.
+- Qui a terminé.
+- Qui rencontre une difficulté.
+
+Le statut global doit être calculé à partir des statuts individuels et des règles de validation.
+
+==================================================
+11. VISIBILITÉ COLLECTIVE
+==================================================
+
+RÈGLE FONDAMENTALE DU PROJET :
+
+TOUS LES AGENTS INSCRITS ET ACTIFS PEUVENT CONSULTER TOUTES LES TÂCHES PUBLIÉES.
+
+Chaque agent peut voir :
+- Les tâches du jour.
+- Les tâches urgentes.
+- Les tâches des collègues.
+- Les tâches en cours.
+- Les tâches terminées.
+- Les tâches en attente.
+- Les tâches bloquées.
+- Les tâches validées.
+
+Chaque tâche doit afficher clairement :
+- Son numéro.
+- Son titre.
+- Sa catégorie.
+- Sa commune.
+- Sa DP.
+- Sa priorité.
+- Son état.
+- Les agents affectés.
+- Sa date de création.
+- Son échéance.
+
+Les agents peuvent consulter les comptes rendus des autres uniquement en lecture seule, selon les règles de confidentialité définies par le chef.
+
+Seuls les agents affectés peuvent modifier l'exécution de la tâche et rédiger leur propre compte rendu.
+
+==================================================
+12. COMPTES RENDUS DÉTAILLÉS
+==================================================
+
+Créer un module COMPTE RENDU D'INTERVENTION.
+
+Chaque tâche doit pouvoir recevoir un ou plusieurs comptes rendus.
+
+Champs :
+
+- Numéro du compte rendu.
+- Numéro de tâche.
+- Agent rédacteur.
+- Date de début.
+- Heure de début.
+- Date de fin.
+- Heure de fin.
+- Description du travail effectué.
+- Résultat.
+- Difficultés.
+- Matériel utilisé.
+- Quantités éventuelles.
+- Travaux restant à réaliser.
+- Recommandations.
+- Observations.
+- Photos avant intervention.
+- Photos après intervention.
+- Documents joints.
+- Position GPS facultative.
+- Confirmation de l'agent.
+- Date de transmission.
+
+Prévoir les boutons :
+- ENREGISTRER BROUILLON.
+- MODIFIER BROUILLON.
+- TRANSMETTRE AU CHEF.
+- ANNULER AVANT TRANSMISSION SELON LES DROITS.
+
+Après transmission, le compte rendu devient verrouillé pour éviter toute modification silencieuse.
+
+Le chef peut :
+- Consulter.
+- Ajouter un commentaire.
+- Demander une correction.
+- Refuser.
+- Valider.
+
+Une correction doit créer une nouvelle version en conservant les précédentes.
+
+==================================================
+13. CONTRÔLE ET VALIDATION DU CHEF
+==================================================
+
+Créer un écran COMPTES RENDUS À VALIDER.
+
+Le chef voit :
+- Les comptes rendus récemment transmis.
+- Les tâches terminées.
+- Les interventions sans compte rendu.
+- Les interventions nécessitant une correction.
+- Les comptes rendus validés.
+
+Lorsqu'un compte rendu est refusé, le chef doit indiquer un motif obligatoire.
+
+Lorsqu'il est validé :
+- Enregistrer la date.
+- Enregistrer l'identité du chef.
+- Mettre à jour le statut de la tâche.
+- Ajouter une ligne dans l'historique.
+- Notifier les agents concernés.
+
+==================================================
+14. TABLEAU DE BORD DU CHEF
+==================================================
+
+Créer un tableau de bord professionnel.
+
+Indicateurs :
+- Total des tâches.
+- Nouvelles tâches.
+- Tâches transmises.
+- Tâches acceptées.
+- Tâches en cours.
+- Tâches terminées.
+- Tâches validées.
+- Tâches en attente.
+- Tâches bloquées.
+- Tâches en retard.
+- Comptes rendus à valider.
+
+Créer des graphiques :
+- Tâches par catégorie.
+- Tâches par commune.
+- Tâches par DP.
+- Tâches par agent.
+- Tâches par priorité.
+- Évolution quotidienne.
+- Évolution hebdomadaire.
+- Évolution mensuelle.
+
+Créer des filtres combinables.
+
+Le tableau de bord doit être actualisé automatiquement.
+
+==================================================
+15. SUIVI INDIVIDUEL DES AGENTS
+==================================================
+
+Créer une fiche détaillée pour chaque agent.
+
+Afficher :
+- Identité.
+- Statut.
+- Dernière connexion.
+- Nombre de tâches affectées.
+- Nombre de tâches acceptées.
+- Nombre de tâches en cours.
+- Nombre de tâches terminées.
+- Nombre de tâches validées.
+- Nombre de tâches bloquées.
+- Nombre de retards.
+- Comptes rendus en attente.
+
+Créer une vue chronologique des interventions.
+
+Ne pas calculer une note de performance uniquement à partir du volume de tâches.
+
+Distinguer les tâches simples, complexes, urgentes et collectives.
+
+==================================================
+16. PLANNING JOURNALIER
+==================================================
+
+Créer un module PLANNING DU CHEF D'ÉQUIPE.
+
+Permettre de :
+- Préparer le programme de la journée.
+- Affecter les tâches aux agents.
+- Définir les horaires.
+- Organiser les déplacements.
+- Consulter le planning de chaque agent.
+- Modifier le planning.
+- Consulter les tâches non réalisées de la veille.
+- Reporter une tâche à une autre date.
+
+Créer un affichage journalier, hebdomadaire et mensuel.
+
+Prévoir l'impression du programme journalier en PDF.
+
+==================================================
+17. NOTIFICATIONS
+==================================================
+
+Utiliser Firebase Cloud Messaging.
+
+Notifier les utilisateurs pour :
+- Nouvelle tâche.
+- Nouvelle affectation.
+- Modification d'une tâche.
+- Changement de priorité.
+- Tâche urgente.
+- Modification d'échéance.
+- Compte rendu transmis.
+- Compte rendu refusé.
+- Compte rendu validé.
+- Commentaire du chef.
+- Tâche en retard.
+
+Prévoir une boîte de notifications dans l'application.
+
+Ne pas envoyer de notification en double.
+
+Conserver l'historique des notifications.
+
+==================================================
+18. MODE HORS CONNEXION
+==================================================
+
+Le fonctionnement hors connexion est obligatoire.
+
+Sur Android :
+- Stockage SQLite.
+- Cache des tâches.
+- Cache des agents.
+- Cache des paramètres.
+- Conservation des comptes rendus.
+- Conservation des photographies.
+- File d'attente des opérations.
+
+Sur Web :
+- IndexedDB.
+- Service Worker.
+- Mise en cache des ressources de l'application.
+
+Lorsque Internet est indisponible :
+- Permettre de consulter les dernières données synchronisées.
+- Permettre de modifier les tâches autorisées.
+- Permettre de rédiger les comptes rendus.
+- Permettre de joindre des photos.
+- Afficher clairement les opérations en attente.
+
+Au retour de la connexion :
+- Détecter automatiquement Internet.
+- Synchroniser les données.
+- Éviter les doublons.
+- Vérifier les conflits.
+- Confirmer les opérations réussies.
+- Conserver les opérations non synchronisées en cas d'erreur.
+
+Chaque opération doit posséder un UUID unique.
+
+Prévoir les états :
+- SYNCHRONISÉ.
+- EN ATTENTE.
+- EN COURS.
+- ERREUR.
+- CONFLIT.
+
+Ne jamais supprimer une donnée locale avant confirmation de son enregistrement central.
+
+IMPORTANT :
+Les agents ne peuvent pas recevoir les nouvelles tâches en temps réel pendant une coupure Internet. Les tâches seront actualisées à la reconnexion.
+
+==================================================
+19. GOOGLE SHEETS : STRUCTURE DE LA BASE
+==================================================
+
+Créer automatiquement le classeur :
+GESTION_EQUIPE_GAZ_SIDI_ALI.
+
+Créer les feuilles suivantes.
+
+1. AGENTS
+agent_id, matricule, nom, prenom, telephone, fonction, role, statut, date_creation, derniere_connexion.
+
+2. TACHES
+task_id, numero_tache, titre, categorie, description, instructions, commune, dp, adresse, latitude, longitude, priorite, date_creation, date_debut_prevue, date_fin_prevue, statut_global, createur_id, updated_at.
+
+3. AFFECTATIONS
+assignment_id, task_id, agent_id, date_affectation, statut_agent, date_acceptation, date_debut, date_fin.
+
+4. COMPTES_RENDUS
+report_id, task_id, agent_id, version, travail_effectue, resultat, difficultes, materiel, travaux_restants, recommandations, date_soumission, validation, commentaire_chef.
+
+5. PHOTOS
+photo_id, task_id, report_id, agent_id, type_photo, drive_file_id, drive_url, date_creation.
+
+6. HISTORIQUE
+history_id, task_id, user_id, action, ancien_etat, nouvel_etat, ancienne_valeur, nouvelle_valeur, date_serveur.
+
+7. PARAMETRES
+param_id, categorie, valeur, libelle, actif.
+
+8. NOTIFICATIONS
+notification_id, user_id, task_id, titre, message, date_creation, statut_envoi, date_lecture.
+
+9. EQUIPEMENTS
+equipment_id, designation, reference, quantite, agent_id, date_sortie, date_retour, etat.
+
+10. SESSIONS_ET_APPAREILS
+device_id, user_id, plateforme, derniere_connexion, token_notification, statut.
+
+11. SYNCHRONISATION
+operation_id, user_id, device_id, type_operation, date_operation, statut, message_erreur.
+
+Prévoir les en-têtes, validations, formats et index nécessaires.
+
+Ne jamais utiliser le numéro de ligne comme identifiant permanent.
+
+Ne jamais utiliser le nom de l'agent comme clé étrangère.
+
+==================================================
+20. API BACKEND
+==================================================
+
+Créer des API REST structurées.
+
+AUTHENTIFICATION :
+POST /auth/login
+POST /auth/logout
+GET /auth/me
+
+AGENTS :
+GET /agents
+POST /agents
+GET /agents/:id
+PUT /agents/:id
+PATCH /agents/:id/status
+
+TÂCHES :
+GET /tasks
+POST /tasks
+GET /tasks/:id
+PUT /tasks/:id
+PATCH /tasks/:id/status
+POST /tasks/:id/assign
+DELETE /tasks/:id/assign/:agentId
+
+COMPTES RENDUS :
+GET /reports
+POST /reports
+GET /reports/:id
+PUT /reports/:id
+POST /reports/:id/submit
+POST /reports/:id/validate
+POST /reports/:id/reject
+
+HISTORIQUE :
+GET /history
+GET /history/task/:taskId
+GET /history/agent/:agentId
+
+STATISTIQUES :
+GET /dashboard
+GET /statistics/agents
+GET /statistics/tasks
+
+SYNCHRONISATION :
+POST /sync/push
+GET /sync/pull
+GET /sync/status
+
+PHOTOS :
+POST /photos/upload
+GET /photos/:id
+
+Tous les endpoints doivent être documentés et sécurisés.
+
+==================================================
+21. STRUCTURE DU PROJET
+==================================================
+
+Organiser le code de manière professionnelle.
+
+frontend/
+  src/
+    components/
+    pages/
+    layouts/
+    services/
+    hooks/
+    stores/
+    models/
+    utils/
+    styles/
+
+backend/
+  src/
+    controllers/
+    services/
+    repositories/
+    middleware/
+    routes/
+    validators/
+    models/
+    config/
+    utils/
+
+database/
+  google-sheets/
+  scripts/
+  backups/
+
+android/
+  capacitor/
+  assets/
+
+web/
+  deployment/
+
+docs/
+  architecture/
+  installation/
+  configuration/
+  API/
+  tests/
+
+Ne pas placer tout le code dans un fichier unique.
+
+Séparer clairement les interfaces, les règles métier, les données et les communications serveur.
+
+==================================================
+22. INTERFACE GRAPHIQUE
+==================================================
+
+Créer une identité visuelle professionnelle inspirée de l'environnement Sonelgaz.
+
+Couleurs :
+- Bleu principal.
+- Blanc.
+- Gris clair.
+- Vert pour les tâches validées.
+- Orange pour les tâches en attente.
+- Rouge pour les urgences.
+- Gris foncé pour les informations secondaires.
+
+Créer une interface responsive et ergonomique.
+
+NAVIGATION CHEF :
+- Tableau de bord.
+- Planning.
+- Toutes les tâches.
+- Nouvelle tâche.
+- Agents.
+- Comptes rendus.
+- Historique.
+- Statistiques.
+- Notifications.
+- Paramètres.
+
+NAVIGATION AGENT :
+- Accueil.
+- Toutes les tâches.
+- Mes tâches.
+- Tâches urgentes.
+- Mes comptes rendus.
+- Historique.
+- Notifications.
+- Mon profil.
+
+Prévoir :
+- Recherche rapide.
+- Filtres.
+- Pagination.
+- Actualisation.
+- Indicateur de connexion.
+- Indicateur de synchronisation.
+- Mode clair et sombre.
+- Grands boutons utilisables avec des gants si possible.
+- Formulaires simples.
+- Confirmation des actions importantes.
+
+==================================================
+23. CARTOGRAPHIE ET LOCALISATION
+==================================================
+
+Prévoir un module de localisation facultatif.
+
+Permettre :
+- Enregistrement de la latitude et longitude d'une intervention.
+- Consultation de la position sur une carte.
+- Ouverture de l'itinéraire dans une application cartographique.
+- Visualisation des tâches par commune et DP.
+
+La position GPS doit être collectée uniquement lorsqu'elle est nécessaire et autorisée.
+
+Ne pas imposer le suivi permanent des agents.
+
+==================================================
+24. DOCUMENTS ET EXPORTATIONS
+==================================================
+
+Créer les rapports suivants :
+
+- Programme journalier.
+- Rapport quotidien des travaux.
+- Rapport hebdomadaire.
+- Rapport mensuel.
+- Rapport individuel par agent.
+- Rapport par commune.
+- Rapport par DP.
+- Rapport par catégorie.
+- Liste des tâches non réalisées.
+- Liste des tâches en retard.
+- Liste des tâches bloquées.
+- Comptes rendus validés.
+
+Formats :
+PDF.
+Excel XLSX.
+CSV.
+
+Chaque rapport doit comporter :
+- Nom du district.
+- Période.
+- Date de génération.
+- Numéro de rapport.
+- Tableau des interventions.
+- Totaux.
+- Observations.
+
+==================================================
+25. SÉCURITÉ ET SAUVEGARDE
+==================================================
+
+Mettre en œuvre :
+- Authentification sécurisée.
+- HTTPS obligatoire.
+- Contrôle d'accès côté serveur.
+- Validation des entrées.
+- Protection contre les injections.
+- Protection des clés API.
+- Gestion des sessions.
+- Journalisation des actions.
+- Sauvegarde quotidienne.
+- Restauration des données.
+- Gestion des accès aux photos.
+- Protection des comptes désactivés.
+
+Les mots de passe ne doivent jamais être stockés en clair dans Google Sheets.
+
+Ne jamais placer de secrets Google ou Firebase dans le code public de l'application.
+
+==================================================
+26. TESTS OBLIGATOIRES
+==================================================
+
+Effectuer des tests fonctionnels et techniques.
+
+TEST 1 :
+Le chef se connecte et crée un agent.
+
+TEST 2 :
+Le chef crée une tâche et l'affecte à deux agents.
+
+TEST 3 :
+Les deux agents reçoivent la notification.
+
+TEST 4 :
+Tous les agents peuvent voir la tâche.
+
+TEST 5 :
+Un agent non affecté ne peut pas modifier la tâche.
+
+TEST 6 :
+Un agent affecté accepte et commence l'intervention.
+
+TEST 7 :
+Il perd la connexion Internet et continue son compte rendu.
+
+TEST 8 :
+Il retrouve Internet et synchronise son compte rendu.
+
+TEST 9 :
+Le chef reçoit le compte rendu et le valide.
+
+TEST 10 :
+Le deuxième agent transmet également son compte rendu.
+
+TEST 11 :
+L'historique conserve les deux interventions.
+
+TEST 12 :
+Le tableau de bord actualise les statistiques.
+
+TEST 13 :
+Un agent désactivé ne peut plus se connecter.
+
+TEST 14 :
+Les données ne sont pas perdues après fermeture et redémarrage de l'application.
+
+TEST 15 :
+Plusieurs utilisateurs modifient des tâches différentes simultanément sans perte de données.
+
+TEST 16 :
+Un conflit de modification est détecté et signalé.
+
+TEST 17 :
+Les rapports PDF et Excel sont correctement générés.
+
+TEST 18 :
+Les interfaces Android et Web affichent les mêmes données après synchronisation.
+
+==================================================
+27. DÉPLOIEMENT ET LIVRABLES
+==================================================
+
+Livrer :
+
+1. Code source frontend complet.
+2. Code source backend complet.
+3. Application Android APK installable.
+4. Interface Web déployable.
+5. Script de création Google Sheets.
+6. Configuration Google Apps Script ou Google API.
+7. Configuration Firebase.
+8. Système de sauvegarde.
+9. Documentation d'installation.
+10. Documentation de maintenance.
+11. Documentation de création des agents.
+12. Documentation de déploiement.
+13. Guide utilisateur du chef.
+14. Guide utilisateur des agents.
+15. Jeux de tests.
+16. Fichier de configuration exemple sans secrets.
+
+L'application doit être installable sur plusieurs téléphones Android.
+
+L'interface Web doit être utilisable sur Windows.
+
+==================================================
+28. MÉTHODE DE DÉVELOPPEMENT IMPOSÉE
+==================================================
+
+Développer progressivement en huit phases.
+
+PHASE 1 :
+Architecture, configuration du projet, authentification et gestion des agents.
+
+PHASE 2 :
+Google Sheets, API Backend et stockage central.
+
+PHASE 3 :
+Création, planification et affectation des tâches.
+
+PHASE 4 :
+Application agent, consultation et mise à jour des états.
+
+PHASE 5 :
+Comptes rendus, photographies et validation du chef.
+
+PHASE 6 :
+Synchronisation en temps réel et mode hors connexion.
+
+PHASE 7 :
+Tableau de bord, statistiques, exports et notifications.
+
+PHASE 8 :
+Tests complets, sécurité, génération APK et déploiement Web.
+
+À chaque phase :
+- Fournir le code complet des fichiers concernés.
+- Indiquer leur emplacement exact.
+- Expliquer les modifications.
+- Effectuer les tests.
+- Corriger les erreurs avant de passer à la phase suivante.
+- Conserver les fonctionnalités déjà validées.
+- Ne jamais remplacer une fonctionnalité opérationnelle par une maquette.
+
+==================================================
+29. RÈGLES DE QUALITÉ NON NÉGOCIABLES
+==================================================
+
+- Pas de données fictives dans la production.
+- Pas de boutons sans fonctionnalité.
+- Pas de fausses notifications.
+- Pas de fausse synchronisation.
+- Pas de comptes rendus perdus.
+- Pas de suppression silencieuse.
+- Pas de modification non autorisée.
+- Pas de mots de passe en clair.
+- Pas de secrets dans le dépôt GitHub.
+- Pas de code monolithique.
+- Pas de dépendances inutiles.
+- Pas de déploiement présenté comme réussi sans vérification.
+- Pas de génération APK avant validation des tests principaux.
+
+L'application doit pouvoir évoluer sans perdre les données existantes.
+
+==================================================
+30. PREMIÈRE ACTION ATTENDUE DE L'IA
+==================================================
+
+NE COMMENCE PAS par produire immédiatement tous les fichiers du projet.
+
+Commence par fournir :
+
+1. L'architecture technique détaillée.
+2. Le schéma des données.
+3. La structure exacte du projet.
+4. Le fonctionnement des permissions.
+5. Le fonctionnement de la synchronisation.
+6. Le fonctionnement hors connexion.
+7. La configuration nécessaire de Google et Firebase.
+8. Le planning de réalisation.
+
+Ensuite, commence la PHASE 1.
+
+À chaque étape, attends la validation du fonctionnement avant de poursuivre.
+
+L'objectif final est de livrer un véritable système professionnel de gestion des travaux de terrain du District Gaz Sidi Ali.
+
+RÉSULTAT ATTENDU :
+
+Le chef d'équipe doit pouvoir, depuis son ordinateur ou son téléphone, organiser le travail, transmettre les tâches, contrôler l'exécution et consulter les comptes rendus.
+
+Chaque agent doit pouvoir, depuis son téléphone, consulter toutes les tâches, identifier ses affectations, réaliser son intervention, signaler les difficultés et transmettre son compte rendu.
+
+Toutes les informations doivent être traçables, sécurisées, synchronisées et conservées.
+
+FIN DU CAHIER DES CHARGES.

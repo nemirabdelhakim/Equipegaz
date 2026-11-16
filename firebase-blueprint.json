@@ -1,0 +1,95 @@
+{
+  "entities": {
+    "AdminUser": {
+      "title": "AdminUser",
+      "description": "Marqueur de rôle Chef d'équipe autorisé dans Firestore",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "email": { "type": "string", "minLength": 3, "maxLength": 160 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "createdAt"]
+    },
+    "AgentPublic": {
+      "title": "AgentPublic",
+      "description": "Fiche opérationnelle d'un agent ou chef d'équipe (sans PII sensible)",
+      "type": "object",
+      "properties": {
+        "agent_id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "matricule": { "type": "string", "minLength": 2, "maxLength": 32 },
+        "nom": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "prenom": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "fonction": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "role": { "type": "string", "enum": ["CHEF", "AGENT"] },
+        "statut": { "type": "string", "enum": ["ACTIF", "INACTIF", "ABSENT", "CONGÉ", "SUSPENDU"] },
+        "firebase_uid": { "type": "string", "minLength": 0, "maxLength": 128 },
+        "date_creation": { "type": "string", "minLength": 10, "maxLength": 40 },
+        "derniere_connexion": { "type": "string", "minLength": 0, "maxLength": 40 }
+      },
+      "required": ["agent_id", "matricule", "nom", "prenom", "fonction", "role", "statut", "date_creation"]
+    },
+    "AgentPrivateInfo": {
+      "title": "AgentPrivateInfo",
+      "description": "Données personnelles isolées d'un agent (téléphone, email de connexion)",
+      "type": "object",
+      "properties": {
+        "agent_id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "owner_uid": { "type": "string", "minLength": 0, "maxLength": 128 },
+        "telephone": { "type": "string", "minLength": 6, "maxLength": 30 },
+        "login_email": { "type": "string", "minLength": 3, "maxLength": 160 }
+      },
+      "required": ["agent_id", "telephone", "login_email"]
+    },
+    "DistrictParam": {
+      "title": "DistrictParam",
+      "description": "Paramètre administrable du district (Commune, DP, Catégorie de travaux)",
+      "type": "object",
+      "properties": {
+        "param_id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "categorie": { "type": "string", "enum": ["COMMUNE", "DP", "COMMUNE_DP", "CATEGORIE_TRAVAUX", "EQUIPE"] },
+        "valeur": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "libelle": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "actif": { "type": "boolean" }
+      },
+      "required": ["param_id", "categorie", "valeur", "libelle", "actif"]
+    },
+    "HistoryLog": {
+      "title": "HistoryLog",
+      "description": "Entrée immuable de journalisation des opérations",
+      "type": "object",
+      "properties": {
+        "history_id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "user_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "action": { "type": "string", "minLength": 2, "maxLength": 80 },
+        "ancien_etat": { "type": "string", "minLength": 0, "maxLength": 80 },
+        "nouvel_etat": { "type": "string", "minLength": 0, "maxLength": 80 },
+        "commentaire": { "type": "string", "minLength": 0, "maxLength": 500 },
+        "date_serveur": { "type": "string", "minLength": 10, "maxLength": 40 }
+      },
+      "required": ["history_id", "user_id", "action", "date_serveur"]
+    }
+  },
+  "firestore": {
+    "/admins/{userId}": {
+      "schema": { "$ref": "#/entities/AdminUser" },
+      "description": "Liste des administrateurs (Chefs d'équipe) habilités"
+    },
+    "/agents/{agentId}": {
+      "schema": { "$ref": "#/entities/AgentPublic" },
+      "description": "Annuaire opérationnel des agents du District Gaz Sidi Ali"
+    },
+    "/agents/{agentId}/private/{docId}": {
+      "schema": { "$ref": "#/entities/AgentPrivateInfo" },
+      "description": "Informations personnelles isolées (téléphone, identifiant)"
+    },
+    "/parameters/{paramId}": {
+      "schema": { "$ref": "#/entities/DistrictParam" },
+      "description": "Référentiels géographiques et catégories d'interventions"
+    },
+    "/history/{historyId}": {
+      "schema": { "$ref": "#/entities/HistoryLog" },
+      "description": "Journal immuable d'audit et de traçabilité"
+    }
+  }
+}
