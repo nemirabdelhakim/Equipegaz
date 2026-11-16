@@ -43,8 +43,14 @@ jobs:
           distribution: "temurin"
           java-version: "21"
 
-      - name: Configurer Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Configurer Android SDK (API 36)
+        run: |
+          SDK_BIN="${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -x "$SDK_BIN" ]; then
+            SDK_BIN="$(find /usr/local/lib/android/sdk/cmdline-tools -name sdkmanager -type f | head -n 1)"
+          fi
+          yes | "$SDK_BIN" --licenses > /dev/null || true
+          "$SDK_BIN" "platform-tools" "platforms;android-36" "build-tools;36.0.0"
 
       - name: Installer les dépendances Node.js
         run: npm install --no-audit --no-fund
